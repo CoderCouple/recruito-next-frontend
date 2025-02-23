@@ -10,6 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
+# database
+/prisma/db.sqlite
+/prisma/db.sqlite-journal
+db.sqlite
+
 # testing
 /coverage
 
@@ -39,3 +44,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+*storybook.log
+
+certificates
