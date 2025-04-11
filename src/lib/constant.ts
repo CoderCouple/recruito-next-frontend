@@ -2,6 +2,9 @@ export const clients = [...new Array(10)].map((client, index) => ({
   href: `/${index + 1}.png`,
 }));
 
+export const routes = new Map<string, string>();
+routes.set("SIGN_IN", "/sign-in");
+
 export const products = [
   {
     title: "Moonbeam",

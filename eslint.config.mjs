@@ -1,127 +1,3 @@
-// import { FlatCompat } from "@eslint/eslintrc";
-// import eslintPluginBoundaries from "eslint-plugin-boundaries";
-// import checkFile from "eslint-plugin-check-file";
-// import eslintPluginN from "eslint-plugin-n";
-// import { dirname } from "path";
-// import { fileURLToPath } from "url";
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-// const compat = new FlatCompat({
-//   baseDirectory: __dirname,
-// });
-// // Configuration borrowed from:
-// // https://www.youtube.com/watch?v=xyxrB2Aa7KE&t=1136s
-// // https://www.youtube.com/watch?v=dLRKV-bajS4&t=1639s
-// /** @type {import('eslint').Linter.Config[]} */
-// const eslintConfig = [
-//   ...compat.extends("next/core-web-vitals"),
-//   ...compat.extends("next/typexscript"),
-//   ...compat.extends("prettier"),
-//   {
-//     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-//     //files: ["src/**/*.*"],
-//     plugins: {
-//       "check-file": checkFile,
-//       n: eslintPluginN,
-//       boundaries: eslintPluginBoundaries,
-//     },
-//     processor: "check-file/eslint-processor-check-file",
-//     rules: {
-//       "prefer-arrow-callback": "error",
-//       "prefer-template": "error",
-//       semi: "error",
-//       quotes: ["error", "double"],
-//       "n/no-process-env": "error",
-//       "n/no-missing-import": "error",
-//       "boundaries/no-unknown": "error",
-//       "boundaries/no-unknown-files": "error",
-//       "boundaries/element-types": [
-//         "error",
-//         {
-//           default: "disallow",
-//           rules: [
-//             {
-//               from: "[shared]",
-//               allow: ["shared"],
-//             },
-//             {
-//               from: ["feature"],
-//               allow: [
-//                 "shared",
-//                 ["feature", { featureName: "${from.featureName" }],
-//               ],
-//             },
-//             {
-//               from: ["app", "neverImport"],
-//               allow: ["shared", "feature"],
-//             },
-//             {
-//               from: ["app"],
-//               allow: [["app", { filename: "*.css" }]],
-//             },
-//           ],
-//         },
-//       ],
-//       "check-file/filename-naming-convention": [
-//         "error",
-//         {
-//           "**/*.{jsx,tsx}": "KEBAB_CASE",
-//           "**/*.{js,ts}": "KEBAB_CASE",
-//         },
-//         {
-//           ignoreMiddleExtensions: true,
-//         },
-//       ],
-//       "check-file/folder-naming-convention": [
-//         "error",
-//         {
-//           "src/**/": "KEBAB_CASE",
-//         },
-//       ],
-//     },
-//     settings: {
-//       boundaries: {
-//         rootDir: __dirname,
-//         ignore: ["**/node_modules/**"],
-//         include: ["src/**/*"],
-//         elements: [
-//           {
-//             mode: "full",
-//             type: "shared",
-//             pattern: [
-//               "src/components/**/*",
-//               "src/providers/**/*",
-//               "src/lib/**/*",
-//               "src/utils/**/*",
-//               "src/db/***",
-//               "src/hooks/***",
-//               "src/api/**/*",
-//               "src/env/**/*",
-//             ],
-//           },
-//           {
-//             mode: "full",
-//             type: "feature",
-//             capture: ["featureName"],
-//             pattern: ["src/features/*/**/*"],
-//           },
-//           {
-//             mode: "full",
-//             type: "app",
-//             capture: ["_", "filename"],
-//             pattern: ["src/app/**/*"],
-//           },
-//           {
-//             mode: "full",
-//             type: "neverImport",
-//             pattern: ["src/*", "src/features/*/**/*"],
-//           },
-//         ],
-//       },
-//     },
-//   },
-// ];
-//export default eslintConfig;
 import { FlatCompat } from "@eslint/eslintrc";
 import eslintPluginBoundaries from "eslint-plugin-boundaries";
 import checkFilePlugin from "eslint-plugin-check-file";
@@ -134,10 +10,12 @@ const __dirname = dirname(__filename);
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
+
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
+    ignores: ["**/node_modules/**", "**/src/components/ui/**", "middleware.ts"],
     plugins: {
       "check-file": checkFilePlugin,
       n: nPlugin,
@@ -155,43 +33,52 @@ const eslintConfig = [
       // "check-file/filename-naming-convention": [
       //   "error",
       //   {
-      //     "**/*.{ts,tsx,js,jsx}": "kebab-case"
+      //     "**/*.{ts,tsx,js,jsx}": "KEBAB_CASE",
+      //     "src/components/ui/**/*": "!KEBAB_CASE",
       //   },
       //   {
-      //     "ignoreMiddleExtensions": true
-      //   }
+      //     ignoreMiddleExtensions: true,
+      //   },
       // ],
       // "check-file/folder-naming-convention": [
       //   "error",
       //   {
-      //     "src/**/": "kebab-case"
-      //   }
+      //     "src/**/": "KEBAB_CASE",
+      //     "src/components/ui/**": "!KEBAB_CASE",
+      //     "src/app/**": "!KEBAB_CASE",
+      //   },
       // ],
-      "boundaries/no-unknown": ["warn"],
-      "boundaries/no-unknown-files": ["warn"],
+      //"boundaries/no-unknown": ["warn"],
+      //"boundaries/no-unknown-files": ["warn"],
       "boundaries/element-types": [
         "error",
         {
           default: "disallow",
           rules: [
             {
-              from: "[shared]",
+              from: "shared",
               allow: ["shared"],
+              message:
+                "Shared modules can only import from other shared modules",
             },
             {
-              from: ["feature"],
+              from: "feature",
               allow: [
                 "shared",
-                ["feature", { featureName: "${from.featureName" }],
+                ["feature", { featureName: "${from.featureName}" }],
               ],
+              message:
+                "Features can only import from shared modules or their own feature",
             },
             {
-              from: ["app", "neverImport"],
+              from: "app",
               allow: ["shared", "feature"],
+              message: "App modules can import from shared and feature modules",
             },
             {
-              from: ["app"],
-              allow: [["app", { filename: "*.css" }]],
+              from: "neverImport",
+              allow: [],
+              message: "Root level files should not be imported",
             },
           ],
         },
@@ -199,42 +86,38 @@ const eslintConfig = [
     },
     settings: {
       boundaries: {
-        rootDir: __dirname,
-        ignore: ["**/node_modules/**"],
-        include: ["src/**/*"],
+        rootDir: `${__dirname}/src`,
+        ignore: ["**/node_modules/**", "**/components/ui/**"],
+        include: ["**/*"],
         elements: [
           {
-            mode: "full",
+            mode: "file",
             type: "shared",
             pattern: [
-              "src/components/**/*",
-              "src/providers/**/*",
-              "src/lib/**/*",
-              "src/utils/**/*",
-              "src/db/**/*",
-              "src/hooks/**/*",
-              "src/api/**/*",
-              "src/env/**/*",
-              "src/config/**/*",
-              "src/types/**/*",
+              "components/**/*",
+              "providers/**/*",
+              "lib/**/*",
+              "utils/**/*",
+              "db/**/*",
+              "hooks/**/*",
+              "api/**/*",
+              "env/**/*",
+              "config/**/*",
+              "types/**/*",
+              "middleware.ts",
             ],
           },
           {
-            mode: "full",
+            mode: "file",
             type: "feature",
             capture: ["featureName"],
-            pattern: ["src/features/*/**/*"],
+            pattern: ["features/*/**/*"],
           },
           {
-            mode: "full",
+            mode: "file",
             type: "app",
             capture: ["_", "filename"],
-            pattern: ["src/app/**/*"],
-          },
-          {
-            mode: "full",
-            type: "neverImport",
-            pattern: ["src/*", "src/features/*/**/*"],
+            pattern: ["app/**/*"],
           },
         ],
       },

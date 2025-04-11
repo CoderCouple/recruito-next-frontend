@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
-  title: "Recruito AI",
-  description: "Recruito: The only recuiting ai agent you will ever need.",
+  title: "Context Zero AI",
+  description: "Context Zero: The only context your ai agent will ever need.",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
   },
