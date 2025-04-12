@@ -4,6 +4,7 @@ import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { waitFor } from "@/lib/utils";
 
 function page() {
   return (
@@ -35,7 +36,7 @@ function UserWorkflowSkeleton() {
 }
 
 async function UserWorkflows() {
-  // wait waitFor(3000); // This will trigger Suspense to show the fallback
+  await waitFor(3000); // This will trigger Suspense to show the fallback
   const error = false;
   if (!error) {
     return (
