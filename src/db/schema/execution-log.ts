@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { executionPhases } from "./execution-phase";
-import { users } from "./user";
+import { user } from "./user";
 
 export const executionLogs = pgTable("execution_log", {
   id: text("id").primaryKey(),
@@ -16,8 +16,8 @@ export const executionLogs = pgTable("execution_log", {
   timestamp: timestamp("timestamp", { withTimezone: true }),
 
   // Meta fields
-  createdBy: text("createdBy").references(() => users.id),
-  updatedBy: text("updatedBy").references(() => users.id),
+  createdBy: text("createdBy").references(() => user.id),
+  updatedBy: text("updatedBy").references(() => user.id),
   updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
   isDeleted: boolean("isDeleted").default(false),
 
@@ -29,12 +29,12 @@ export const executionLogRelations = relations(executionLogs, ({ one }) => ({
     fields: [executionLogs.executionPhaseId],
     references: [executionPhases.id],
   }),
-  creator: one(users, {
+  creator: one(user, {
     fields: [executionLogs.createdBy],
-    references: [users.id],
+    references: [user.id],
   }),
-  updater: one(users, {
+  updater: one(user, {
     fields: [executionLogs.updatedBy],
-    references: [users.id],
+    references: [user.id],
   }),
 }));
