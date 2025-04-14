@@ -6,59 +6,68 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import { user } from "./user";
 import { workflowExecution } from "./workflow-execution";
 
-export const executionPhases = pgTable("execution_phase", {
-  id: text("id").primaryKey(),
+export const executionPhase = pgTable("execution_phase", {
+  id: uuid("id").primaryKey().defaultRandom(),
 
-  userId: text("userId").references(() => user.id),
-  workflowExecutionId: text("workflowExecutionId").references(
-    () => workflowExecution.id
-  ),
+  userId: uuid("user_id") // DB column = user_id
+    .notNull()
+    .references(() => user.id),
 
-  status: text("status"),
-  number: integer("number"),
-  node: text("node"),
-  name: text("name"),
+  workflowExecutionId: uuid("workflow_execution_id")
+    .notNull()
+    .references(() => workflowExecution.id),
 
-  startedAt: timestamp("startedAt", { withTimezone: true }),
-  completedAt: timestamp("completedAt", { withTimezone: true }),
+  status: varchar("status", { length: 50 }).notNull(),
+  number: integer("number").notNull(),
+  node: varchar("node", { length: 255 }),
+  name: varchar("name", { length: 255 }),
 
-  inputs: text("inputs"), // could be JSON later
-  outputs: text("outputs"), // could be JSON later
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
 
-  creditsConsumed: numeric("creditsConsumed"),
+  inputs: text("inputs"),
+  outputs: text("outputs"),
 
-  // Meta fields
-  createdBy: text("createdBy").references(() => user.id),
-  updatedBy: text("updatedBy").references(() => user.id),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
-  isDeleted: boolean("isDeleted").default(false),
+  creditsConsumed: numeric("credits_consumed"),
 
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  createdBy: uuid("created_by")
+    .notNull()
+    .references(() => user.id),
+  updatedBy: uuid("updated_by")
+    .notNull()
+    .references(() => user.id),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  isDeleted: boolean("is_deleted").notNull().default(false),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
-export const executionPhaseRelations = relations(
-  executionPhases,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [executionPhases.userId],
-      references: [user.id],
-    }),
-    creator: one(user, {
-      fields: [executionPhases.createdBy],
-      references: [user.id],
-    }),
-    updater: one(user, {
-      fields: [executionPhases.updatedBy],
-      references: [user.id],
-    }),
-    workflowExecution: one(workflowExecution, {
-      fields: [executionPhases.workflowExecutionId],
-      references: [workflowExecution.id],
-    }),
-  })
-);
+export const executionPhaseRelations = relations(executionPhase, ({ one }) => ({
+  user: one(user, {
+    fields: [executionPhase.userId],
+    references: [user.id],
+  }),
+  creator: one(user, {
+    fields: [executionPhase.createdBy],
+    references: [user.id],
+  }),
+  updater: one(user, {
+    fields: [executionPhase.updatedBy],
+    references: [user.id],
+  }),
+  workflowExecution: one(workflowExecution, {
+    fields: [executionPhase.workflowExecutionId],
+    references: [workflowExecution.id],
+  }),
+}));

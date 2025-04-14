@@ -3,32 +3,50 @@ import {
   boolean,
   numeric,
   pgTable,
-  text,
   timestamp,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import { user } from "./user";
 import { workflow } from "./workflow";
 
 export const workflowExecution = pgTable("workflow_execution", {
-  id: text("id").primaryKey(),
-  workflowId: text("workflowId").references(() => user.id),
-  userId: text("userId").references(() => user.id),
+  id: uuid("id").primaryKey().defaultRandom(),
 
-  trigger: text("trigger"),
-  status: text("status"),
+  workflowId: uuid("workflow_id")
+    .notNull()
+    .references(() => workflow.id),
 
-  creditsConsumed: numeric("creditsConsumed"),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id),
 
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-  startedAt: timestamp("startedAt", { withTimezone: true }),
-  completedAt: timestamp("completedAt", { withTimezone: true }),
+  trigger: varchar("trigger", { length: 255 }),
+  status: varchar("status", { length: 50 }),
 
-  // Meta columns
-  createdBy: text("createdBy").references(() => user.id),
-  updatedBy: text("updatedBy").references(() => user.id),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
-  isDeleted: boolean("isDeleted").default(false),
+  creditsConsumed: numeric("credits_consumed"),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+
+  createdBy: uuid("created_by")
+    .notNull()
+    .references(() => user.id),
+
+  updatedBy: uuid("updated_by")
+    .notNull()
+    .references(() => user.id),
+
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+
+  isDeleted: boolean("is_deleted").notNull().default(false),
 });
 
 export const workflowExecutionRelations = relations(

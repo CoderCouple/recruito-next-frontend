@@ -48,3 +48,7 @@ next-env.d.ts
 *storybook.log
 
 certificates
+
+docker-data
+
+docker-data/db

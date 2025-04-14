@@ -3,40 +3,55 @@ import {
   boolean,
   integer,
   pgTable,
-  text,
   timestamp,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import { user } from "./user";
 
-export const userPurchases = pgTable("user_purchase", {
-  id: text("id").primaryKey(),
-  userId: text("userId").references(() => user.id),
-  stripeId: text("stripeId"),
-  description: text("description"),
-  amount: integer("amount"),
-  currency: text("currency"),
+export const userPurchase = pgTable("user_purchase", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id),
+
+  stripeId: varchar("stripe_id", { length: 255 }).notNull().unique(),
+
+  description: varchar("description", { length: 1024 }),
+  amount: integer("amount").notNull(),
+  currency: varchar("currency", { length: 10 }),
   date: timestamp("date", { withTimezone: true }),
 
-  createdBy: text("createdBy").references(() => user.id),
-  updatedBy: text("updatedBy").references(() => user.id),
-  isDeleted: boolean("isDeleted").default(false),
+  createdBy: uuid("created_by")
+    .notNull()
+    .references(() => user.id),
+  updatedBy: uuid("updated_by")
+    .notNull()
+    .references(() => user.id),
 
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+  isDeleted: boolean("is_deleted").notNull().default(false),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
-export const userPurchaseRelations = relations(userPurchases, ({ one }) => ({
+export const userPurchaseRelations = relations(userPurchase, ({ one }) => ({
   user: one(user, {
-    fields: [userPurchases.userId],
+    fields: [userPurchase.userId],
     references: [user.id],
   }),
   creator: one(user, {
-    fields: [userPurchases.createdBy],
+    fields: [userPurchase.createdBy],
     references: [user.id],
   }),
   updater: one(user, {
-    fields: [userPurchases.updatedBy],
+    fields: [userPurchase.updatedBy],
     references: [user.id],
   }),
 }));

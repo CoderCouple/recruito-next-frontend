@@ -1,40 +1,53 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
-import { executionPhases } from "./execution-phase";
+import { executionPhase } from "./execution-phase";
 import { user } from "./user";
 
-export const executionLogs = pgTable("execution_log", {
-  id: text("id").primaryKey(),
+export const executionLog = pgTable("execution_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
 
-  executionPhaseId: text("executionPhaseId").references(
-    () => executionPhases.id
-  ),
+  executionPhaseId: uuid("execution_phase_id") // ← db column is snake_case
+    .notNull()
+    .references(() => executionPhase.id), // ← field name is camelCase
 
-  logLevel: text("logLevel"),
-  message: text("message"),
-  timestamp: timestamp("timestamp", { withTimezone: true }),
+  logLevel: varchar("log_level", { length: 20 }).notNull(),
+  message: varchar("message", { length: 2048 }).notNull(),
+  timestamp: timestamp("timestamp", { withTimezone: true }).notNull(),
 
-  // Meta fields
-  createdBy: text("createdBy").references(() => user.id),
-  updatedBy: text("updatedBy").references(() => user.id),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
-  isDeleted: boolean("isDeleted").default(false),
+  createdBy: uuid("created_by")
+    .notNull()
+    .references(() => user.id),
+  updatedBy: uuid("updated_by")
+    .notNull()
+    .references(() => user.id),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  isDeleted: boolean("is_deleted").notNull().default(false),
 
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
-export const executionLogRelations = relations(executionLogs, ({ one }) => ({
-  executionPhase: one(executionPhases, {
-    fields: [executionLogs.executionPhaseId],
-    references: [executionPhases.id],
+export const executionLogRelations = relations(executionLog, ({ one }) => ({
+  executionPhase: one(executionPhase, {
+    fields: [executionLog.executionPhaseId],
+    references: [executionPhase.id],
   }),
   creator: one(user, {
-    fields: [executionLogs.createdBy],
+    fields: [executionLog.createdBy],
     references: [user.id],
   }),
   updater: one(user, {
-    fields: [executionLogs.updatedBy],
+    fields: [executionLog.updatedBy],
     references: [user.id],
   }),
 }));

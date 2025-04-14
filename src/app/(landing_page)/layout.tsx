@@ -15,5 +15,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <main className="flex flex-col">{children}</main>;
+  return (
+    <main className="flex flex-col" role="main">
+      {children}
+    </main>
+  );
 }

@@ -1,21 +1,38 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgTable,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { user } from "./user";
 
 export const credential = pgTable("credential", {
-  id: text("id").primaryKey(),
-  userId: text("userId").references(() => user.id),
+  id: uuid("id").primaryKey().defaultRandom(),
 
-  name: text("name"),
-  value: text("value"),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id),
 
-  createdBy: text("createdBy").references(() => user.id),
-  updatedBy: text("updatedBy").references(() => user.id),
-  isDeleted: boolean("isDeleted").default(false),
+  name: varchar("name", { length: 255 }).notNull(),
+  value: varchar("value", { length: 2048 }).notNull(), // long enough for secrets, tokens, etc.
 
-  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+  createdBy: uuid("created_by")
+    .notNull()
+    .references(() => user.id),
+  updatedBy: uuid("updated_by")
+    .notNull()
+    .references(() => user.id),
+  isDeleted: boolean("is_deleted").notNull().default(false),
+
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const credentialRelations = relations(credential, ({ one }) => ({
