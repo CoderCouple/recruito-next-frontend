@@ -64,3 +64,6 @@ export const workflowRelations = relations(workflow, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+type Workflow = typeof workflow.$inferSelect;
+export type { Workflow };

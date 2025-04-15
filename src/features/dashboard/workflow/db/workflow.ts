@@ -10,6 +10,7 @@ export async function getWorkflowForUser({ userId }: { userId: string }) {
 
     return result;
   } catch (err) {
+    console.log(err);
     throw new AppError("Failed to fetch workflows", "WORKFLOW_DB_ERROR");
   }
 }

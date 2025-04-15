@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { Workflow } from "@/db/schema/workflow";
 import { getWorkflowForUserUseCase } from "@/features/dashboard/workflow/use-case/workflow";
 import { handleServerError } from "@/lib/error-handler";
 import { rateLimitByKey } from "@/lib/limiter";
@@ -17,7 +18,7 @@ export const getUserWorkflowAction = authenticatedAction
     async ({
       input: { name, description },
       ctx: { userId },
-    }): Promise<ActionResponse<any>> => {
+    }): Promise<ActionResponse<Workflow[] | null>> => {
       try {
         await rateLimitByKey({ key: `${userId}-get-user-workflow` });
         const data = await getWorkflowForUserUseCase(userId, {
