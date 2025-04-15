@@ -49,6 +49,6 @@ next-env.d.ts
 
 certificates
 
-docker-data
+*docker-data*
 
-docker-data/db
+*docker-data/db*
